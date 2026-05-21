@@ -15,6 +15,7 @@ import Phaser from 'phaser';
 import * as GC from '../../logic/GameConstants';
 import * as Proj from './ProjectionV2';
 import type { RecipeContext } from './recipes/RecipeContext';
+import type { ObjectSpriteRegistry } from './assets/ObjectSpriteRegistry';
 import { drawSlot } from './recipes/slot';
 import { drawSmallTable } from './recipes/smallTable';
 import { drawLargeTable } from './recipes/largeTable';
@@ -33,6 +34,7 @@ export function drawObjects(
   functionalIds: ReadonlySet<string>,
   tiles: readonly GC.Tile[],
   baseX: number, baseY: number, ts: number,
+  spriteRegistry?: ObjectSpriteRegistry,
 ): void {
   if (placedObjs.length === 0) return;
 
@@ -54,7 +56,7 @@ export function drawObjects(
     // which placements aren't currently operating.
     const alpha = isFunctional ? 1.0 : 0.45;
     const ctx: RecipeContext = {
-      g, obj, tiles, baseX, baseY, ts, alpha, isFunctional,
+      g, obj, tiles, baseX, baseY, ts, alpha, isFunctional, spriteRegistry,
     };
     _dispatch(ctx);
   }

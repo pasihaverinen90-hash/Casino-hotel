@@ -29,6 +29,8 @@ import { CameraControllerV2 } from './CameraControllerV2';
 import { InputControllerV2 } from './InputControllerV2';
 import { GuestVisualControllerV2 } from '../guests/GuestVisualControllerV2';
 import { ZoomControlsV2 } from '../ui/ZoomControlsV2';
+import { preloadObjectSpritesV2 } from '../render/assets/PreloadAssetsV2';
+import { ObjectSpriteRegistry } from '../render/assets/ObjectSpriteRegistry';
 
 export class PresentationSceneV2 extends Phaser.Scene {
   private gfxFloor!       : Phaser.GameObjects.Graphics;
@@ -42,9 +44,18 @@ export class PresentationSceneV2 extends Phaser.Scene {
   private guestController!: GuestVisualControllerV2;
   private inputController!: InputControllerV2;
   private zoomControls?   : ZoomControlsV2;
+  private spriteRegistry! : ObjectSpriteRegistry;
 
   constructor() {
     super({ key: 'PresentationSceneV2' });
+  }
+
+  // Phaser preload hook. Sprite assets register with the loader here;
+  // ObjectSpriteRegistry checks textures.exists() at draw time so a
+  // missing/404'd file does not break rendering — the recipe falls
+  // back to its procedural path.
+  preload(): void {
+    preloadObjectSpritesV2(this);
   }
 
   create(): void {
@@ -57,6 +68,8 @@ export class PresentationSceneV2 extends Phaser.Scene {
     this.gfxGhost     = this.add.graphics().setDepth(10);
     this.gfxDemolish  = this.add.graphics().setDepth(11);
     this.gfxSelection = this.add.graphics().setDepth(12);
+
+    this.spriteRegistry  = new ObjectSpriteRegistry(this);
 
     this.camera          = new CameraControllerV2(this, () => this._redraw());
     this.guestController = new GuestVisualControllerV2();
@@ -129,6 +142,11 @@ export class PresentationSceneV2 extends Phaser.Scene {
       this.camera.offsetY,
       this.camera.tileSize,
     );
+    // Sprite-registry framing brackets the object pass: beginFrame()
+    // marks every pooled Image as unused; the recipes claim back the
+    // ones they need; endFrame() hides any leftover Image so demolished
+    // or scrolled-out objects don't ghost on screen.
+    this.spriteRegistry.beginFrame();
     drawObjects(
       this.gfxObjects,
       gameState.placedObjs,
@@ -137,7 +155,9 @@ export class PresentationSceneV2 extends Phaser.Scene {
       this.camera.offsetX,
       this.camera.offsetY,
       this.camera.tileSize,
+      this.spriteRegistry,
     );
+    this.spriteRegistry.endFrame();
     this._redrawOverlays();
     this.zoomControls?.refresh();
   }

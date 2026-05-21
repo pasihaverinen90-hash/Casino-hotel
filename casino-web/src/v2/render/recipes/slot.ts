@@ -10,6 +10,15 @@
 // Visible cabinet faces: top + south + east (looking at the dimetric
 // room from south-east toward north-west). North and west faces are
 // hidden behind the cabinet itself.
+//
+// Sprite hybrid (Phase 12B): when ctx.spriteRegistry has a directional
+// sprite for SLOT_MACHINE + ctx.obj.facing, the cabinet body is drawn
+// as a Phaser Image and the procedural cabinet block is skipped. The
+// floor shadow under the machine tile and the procedural stool on the
+// chair tile still paint into the Graphics layer, so the cabinet feels
+// grounded and the seat tile keeps the existing glyph. When no sprite
+// is available (URL flag ?procedural=1, asset missing, future
+// ObjType), the recipe falls all the way back to drawSlotProcedural.
 import * as GC from '../../../logic/GameConstants';
 import * as Proj from '../ProjectionV2';
 import {
@@ -39,6 +48,38 @@ export function drawSlot(ctx: RecipeContext): void {
 
   // Split into cabinet + chair via the existing orientation helper.
   // Both come back as absolute tile coordinates.
+  const { seat, machine } = GC.slotParts(obj.col, obj.row, obj.facing);
+
+  // Sprite path — only when a registered, loaded texture matches this
+  // facing AND the procedural URL override isn't active. The shadow and
+  // stool stay procedural so the cabinet still feels grounded and the
+  // seat tile keeps its glyph.
+  const usedSprite =
+    ctx.spriteRegistry?.has(obj.type, obj.facing)
+    && ctx.spriteRegistry.drawSprite(
+      { obj, baseX, baseY, ts, alpha },
+      machine.x, machine.y,
+    );
+
+  if (usedSprite) {
+    const tile = offsetQuad(
+      Proj.tileQuad(machine.x, machine.y, ts), baseX, baseY,
+    );
+    drawSoftShadow(g, tile, alpha);
+    drawStoolAtTileCenter(g, seat.x, seat.y, baseX, baseY, ts, alpha);
+    return;
+  }
+
+  drawSlotProcedural(ctx);
+}
+
+// Original procedural cabinet drawing. Preserved unchanged from the
+// pre-12B recipe so the fallback path produces the exact silhouette
+// the rest of the game was tuned against. drawSlot() above selects
+// between this and the sprite path per object.
+function drawSlotProcedural(ctx: RecipeContext): void {
+  const { g, obj, baseX, baseY, ts, alpha } = ctx;
+
   const { seat, machine } = GC.slotParts(obj.col, obj.row, obj.facing);
 
   // ── Cabinet ─────────────────────────────────────────────────────────────
