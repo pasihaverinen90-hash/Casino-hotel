@@ -32,10 +32,10 @@ const BASE = import.meta.env.BASE_URL;
 // centred. anchorX=0.5, anchorY=1.0 places the bottom-centre of the
 // sprite at the renderer's chosen world position.
 //
-// visibleHeightPx values come from the alpha bounding boxes measured
-// at extraction time:
-//   S: 743 px, N: 701 px, W: 680 px, E: 734 px
-// They drive the scale formula: scale = (ts * targetHeightTiles) / visibleHeightPx
+// visibleHeightPx values come from the alpha bounding boxes of the
+// final shipped PNG content. They drive the scale formula:
+//   scale = (ts * targetHeightTiles) / visibleHeightPx
+// Re-measure and update if a sprite file is replaced or mirrored.
 export const OBJECT_SPRITES: readonly ObjectSpriteEntry[] = [
   {
     type             : GC.ObjType.SLOT_MACHINE,
@@ -46,7 +46,7 @@ export const OBJECT_SPRITES: readonly ObjectSpriteEntry[] = [
     anchorY          : 1.0,
     refTileSize      : 46,
     targetHeightTiles: 2.25,
-    visibleHeightPx  : 743,
+    visibleHeightPx  : 730,
   },
   {
     type             : GC.ObjType.SLOT_MACHINE,
@@ -57,7 +57,7 @@ export const OBJECT_SPRITES: readonly ObjectSpriteEntry[] = [
     anchorY          : 1.0,
     refTileSize      : 46,
     targetHeightTiles: 2.25,
-    visibleHeightPx  : 701,
+    visibleHeightPx  : 698,
   },
   {
     type             : GC.ObjType.SLOT_MACHINE,
@@ -68,7 +68,7 @@ export const OBJECT_SPRITES: readonly ObjectSpriteEntry[] = [
     anchorY          : 1.0,
     refTileSize      : 46,
     targetHeightTiles: 2.25,
-    visibleHeightPx  : 734,
+    visibleHeightPx  : 743,
   },
   {
     type             : GC.ObjType.SLOT_MACHINE,
