@@ -90,6 +90,13 @@ export class ObjectSpriteRegistry {
   // tile for a slot machine). Returns true when the sprite was drawn,
   // false when no sprite is available (caller should fall back to its
   // procedural recipe).
+  //
+  // `opts.offsetCol` / `opts.offsetRow` are in tile units and shift only
+  // the visual sprite anchor — the gameplay (anchorCol, anchorRow) tile
+  // remains the source of depthKey, so depth ordering still tracks the
+  // gameplay footprint. Recipes use this to nudge a sprite against the
+  // back edge of its tile (e.g. slot.ts shifts the cabinet away from
+  // the seat tile so back-to-back machines align).
   drawSprite(
     ctx: {
       obj   : GC.PlacedObj,
@@ -100,6 +107,7 @@ export class ObjectSpriteRegistry {
     },
     anchorCol: number,
     anchorRow: number,
+    opts?: { offsetCol?: number; offsetRow?: number },
   ): boolean {
     if (this.forceProcedural) return false;
     const entry = this.byKey.get(_makeKey(ctx.obj.type, ctx.obj.facing));
@@ -118,11 +126,18 @@ export class ObjectSpriteRegistry {
       pool.push(img);
     }
 
-    // Bottom-centre of sprite lands at tile centre. The sprite was
-    // baked bottom-aligned in its canvas so the visible cabinet base
-    // sits at the anchor row/col centre — same ground-plane intuition
-    // as the procedural cabinet's inset footprint base.
-    const centre = Proj.tileCenter(anchorCol, anchorRow, ctx.ts);
+    // Bottom-centre of sprite lands at the (offset-adjusted) tile
+    // centre. The sprite was baked bottom-aligned in its canvas so the
+    // visible cabinet base sits at the anchor row/col centre — same
+    // ground-plane intuition as the procedural cabinet's inset
+    // footprint base.
+    const offCol = opts?.offsetCol ?? 0;
+    const offRow = opts?.offsetRow ?? 0;
+    const centre = Proj.tileCenter(
+      anchorCol + offCol,
+      anchorRow + offRow,
+      ctx.ts,
+    );
     const scale  = (ctx.ts * entry.targetHeightTiles) / entry.visibleHeightPx;
 
     img.setPosition(centre.x + ctx.baseX, centre.y + ctx.baseY);

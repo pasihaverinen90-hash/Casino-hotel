@@ -43,12 +43,29 @@ import {
 const SLOT_CABINET_HEIGHT_TILES = 1.10;
 const SLOT_BODY_INSET           = 0.10;   // fraction of tile, each side
 
+// Tile-unit shift of the sprite anchor toward the back of the machine
+// tile (opposite the seat tile). Pulls the cabinet against its back
+// edge so two slots placed back-to-back align cleanly instead of
+// floating in their tile centres. Sprite-only — procedural fallback
+// keeps its original centred anchor. Per-facing override would live in
+// a small Record<Orientation, number> here, but a single shared value
+// is sufficient because the back direction is derived per-instance
+// from GC.slotParts(machine → seat).
+const SLOT_SPRITE_BACK_OFFSET_TILES = 0.35;
+
 export function drawSlot(ctx: RecipeContext): void {
   const { g, obj, baseX, baseY, ts, alpha } = ctx;
 
   // Split into cabinet + chair via the existing orientation helper.
   // Both come back as absolute tile coordinates.
   const { seat, machine } = GC.slotParts(obj.col, obj.row, obj.facing);
+
+  // Back vector points from the seat back toward the cabinet — i.e.
+  // the direction we want to shift the visible sprite. For a 1-tile
+  // adjacency this is a unit vector along one axis (e.g. (0, -1) for
+  // a S-facing machine whose seat sits one row south).
+  const backDx = machine.x - seat.x;
+  const backDy = machine.y - seat.y;
 
   // Sprite path — only when a registered, loaded texture matches this
   // facing AND the procedural URL override isn't active. The shadow and
@@ -59,6 +76,10 @@ export function drawSlot(ctx: RecipeContext): void {
     && ctx.spriteRegistry.drawSprite(
       { obj, baseX, baseY, ts, alpha },
       machine.x, machine.y,
+      {
+        offsetCol: backDx * SLOT_SPRITE_BACK_OFFSET_TILES,
+        offsetRow: backDy * SLOT_SPRITE_BACK_OFFSET_TILES,
+      },
     );
 
   if (usedSprite) {
