@@ -45,7 +45,7 @@ export const OBJECT_SPRITES: readonly ObjectSpriteEntry[] = [
     anchorX          : 0.5,
     anchorY          : 1.0,
     refTileSize      : 46,
-    targetHeightTiles: 2.25,
+    targetHeightTiles: 2.10,
     visibleHeightPx  : 730,
   },
   {
@@ -56,7 +56,7 @@ export const OBJECT_SPRITES: readonly ObjectSpriteEntry[] = [
     anchorX          : 0.5,
     anchorY          : 1.0,
     refTileSize      : 46,
-    targetHeightTiles: 2.25,
+    targetHeightTiles: 2.10,
     visibleHeightPx  : 698,
   },
   {
@@ -67,7 +67,7 @@ export const OBJECT_SPRITES: readonly ObjectSpriteEntry[] = [
     anchorX          : 0.5,
     anchorY          : 1.0,
     refTileSize      : 46,
-    targetHeightTiles: 2.25,
+    targetHeightTiles: 2.10,
     visibleHeightPx  : 743,
   },
   {
@@ -78,7 +78,7 @@ export const OBJECT_SPRITES: readonly ObjectSpriteEntry[] = [
     anchorX          : 0.5,
     anchorY          : 1.0,
     refTileSize      : 46,
-    targetHeightTiles: 2.25,
+    targetHeightTiles: 2.10,
     visibleHeightPx  : 680,
   },
 ];
